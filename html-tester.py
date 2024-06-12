@@ -115,19 +115,19 @@ def hasRequiredDirsAndFiles(dirToCheck):
                 hasImages = True
             
     if(hasCss==False):
-        print("Directory \"" + dirToCheck + "\" is missing a css folder in violation of standards")
+        print("MISSING CSS DIRECTORY: Directory \"" + dirToCheck + "\" is missing a css folder in violation of standards")
     if(hasJs==False):
-        print("Directory \"" + dirToCheck + "\" is missing a js folder in violation of standards")
+        print("MISSING JS DIRECTORY: Directory \"" + dirToCheck + "\" is missing a js folder in violation of standards")
     if(hasImages==False):
-        print("Directory \"" + dirToCheck + "\" is missing an images folder in violation of standards")
+        print("MISSING IMAGES DIRECTORY: Directory \"" + dirToCheck + "\" is missing an images folder in violation of standards")
     if(hasIndex==False):
-        print("Directory \"" + dirToCheck + "\" is missing an index.html file in violation of standards")
+        print("MISSING INDEX.HTML: Directory \"" + dirToCheck + "\" is missing an index.html file in violation of standards")
            
 def testForSpan(htmlLine, lineNumber, htmlFile):
     # Check for <span>
     hasSpan = re.search("<span", htmlLine, re.RegexFlag.IGNORECASE)
     if(hasSpan):
-        print("<span> found on line "  + str(lineNumber) + " of file: \"" + htmlFile + "\" in violation of standards.")
+        print("<SPAN> LOCATED: <span> found on line "  + str(lineNumber) + " of file: \"" + htmlFile + "\" in violation of standards.")
         print(htmlLine)
    
 def directoryContainsAHtmlFile(dirToCheck):
@@ -159,7 +159,7 @@ def testAHtmlFile(htmlFilePath):
                 if(hasDiv):
                     divCount += 1
                     if(divCount > 1):
-                        print("More than one <div> found on line " + str(lineNumber) + " of file: " + htmlFilePath + "\" in violation of standards.  This is <div> number " + str(divCount) )
+                        print("MULTIPLE <DIV> LOCATED: More than one <div> found on line " + str(lineNumber) + " of file: " + htmlFilePath + "\" in violation of standards.  This is <div> number " + str(divCount) )
                         print(textline)
                 
                 # test for <span>    
@@ -168,16 +168,24 @@ def testAHtmlFile(htmlFilePath):
                 # test for <img> without alt property
                 # Note that this will not register <img> tags where the tag has been broken over more than one line
                 hasImg = re.search("<img\\s.+>", textline, re.RegexFlag.IGNORECASE)
-                if(hasImg):                    
+                if(hasImg != None):                    
                     hasAlt = re.search("\\salt[\\s]*=",textline, re.RegexFlag.IGNORECASE)
                     if(hasAlt == None):
                         print("MISSING ALT: <img> missing alt on line "  + str(lineNumber) + " of file: " + htmlFilePath)
                         print(textline)
+                else:
+                    hasImg = re.search("<img\\s", textline, re.RegexFlag.IGNORECASE)
+                    if(hasImg != None):
+                        hasAlt = re.search("\\salt[\\s]*=",textline, re.RegexFlag.IGNORECASE)
+                        if(hasAlt == None):
+                            print("POSSIBLE MISSING ALT - check next line of html: <img> missing alt on line "  + str(lineNumber) + " of file: " + htmlFilePath)
+                            print(textline)
+                    
                             
                 # Check for uppercase tags
                 hasUppercaseTag = re.search("<[A-Z]+",textline)
                 if(hasUppercaseTag):
-                    print("Upper case HTML found on line "  + str(lineNumber) + " of file: " + htmlFilePath)
+                    print("UPPER CASE HTML: found on line "  + str(lineNumber) + " of file: " + htmlFilePath)
                     print(textline)
                         
                 # Check for 
@@ -206,9 +214,9 @@ def checkFile(filePath):
     fileNameOnly = os.path.basename(filePath)
     if(isOneOfTheAcceptableNonStandardFiles(filePath) == False):
         if(fileNameOnly.islower()==False):
-            print("The file \"" + filePath + "\" contains upper case characters in violation of standards")
+            print("UPPER CASE FILENAME: The file \"" + filePath + "\" contains upper case characters in violation of standards")
         if(' ' in fileNameOnly):
-            print("The file \"" + filePath + "\" contains space characters in violation of standards")
+            print("SPACES IN FILENAME: The file \"" + filePath + "\" contains space characters in violation of standards")
     return fileNameOnly
 
 paramDictionary = parseArgs()
@@ -226,7 +234,7 @@ if(os.path.exists(paramDictionary[dirArg])):
                     if(isHtml):                    
                         testAHtmlFile(f)                
                 except:
-                    print("Unable to print file from dir \"" + d + "\".  This is most commonly caused by the use of non-english unicode character sets.")
+                    print("POSSIBLE FOREIGN UNICODE: Unable to print file from dir \"" + d + "\".  This is most commonly caused by the use of non-english unicode character sets.")
             print(" -------------------------------------------- END OF WEBSITE PROCESSING -------------------------------------------")
             print("")
 else:
