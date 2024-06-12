@@ -200,8 +200,7 @@ paramDictionary = parseArgs()
 
 if(os.path.exists(paramDictionary[dirArg])):    
     print("Processing " + paramDictionary[dirArg])
-    allDirs = findAllDirectories(paramDictionary[dirArg])
-    print(str(allDirs))
+    allDirs = findAllDirectories(paramDictionary[dirArg])    
     for d in allDirs:        
         if(directoryContainsAHtmlFile(d)):
             hasRequiredDirsAndFiles(d)
