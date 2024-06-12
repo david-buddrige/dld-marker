@@ -8,21 +8,6 @@ import os
 import sys
 import re
 
-class Messsage:
-    def __init__(self,message,lineNum):
-        self.line = lineNum
-        self.message = message
-
-outputMessageArray = [] 
-
-def addMessage(message):
-    outputMessageArray.append(message)
-
-def printMessages():
-    for m in outputMessageArray:
-        print(m)
-
-
 dirArg = '-dir'
 pingDocsArg = '-pingDocs'
 requiredParamArray = [dirArg]
@@ -31,6 +16,7 @@ optionalParmArray = [pingDocsArg]
 def isAParam(theParam):    
     retVal = False
     paramsToCheck = requiredParamArray + optionalParmArray
+    #print("Checking " + str(paramsToCheck))
     for p in paramsToCheck:
         if(theParam == p):
             retVal = True
@@ -40,9 +26,15 @@ def parseArgs():
     paramDict = { 
         pingDocsArg: False
     }
+    print(paramDict)
     nextP = None
+    #print(sys.argv)
     for p in sys.argv:
-        if(p != ".\\html-tester.py"):            
+        isMainProgram = re.search("html-tester.py",p)
+        if(isMainProgram):            
+            print("Running " + p)
+        else:
+            #print("Loading " + p)
             if(isAParam(p)):
                 nextP = p
                 if(p == pingDocsArg):
@@ -63,10 +55,11 @@ def parseArgs():
 
 def isValidDirOrFile(dirToCheck):
     isValid = True
-    invalidDirs = ['__MACOSX','.git','.idea','.gitignore','.vscode']
+    invalidDirs = ['__MACOSX$','.git$','.idea$','.gitignore$','.vscode$']
     for inv in invalidDirs:
         isaMatch = re.search(inv,dirToCheck)
         if(isaMatch):
+            #print("Matched " + inv + " with " + dirToCheck)
             isValid = False
     return isValid
            
@@ -178,7 +171,7 @@ def testAHtmlFile(htmlFilePath):
             # template = "An exception of type {0} occurred. Arguments:\n{1!r}"
             # message = template.format(type(ex).__name__, ex.args)
             print("Exception of type : " + str(type(ex).__name__ )) 
-            print("Error occurred on line " + str(lineNumber) + " of file: " + htmlFile)    
+            print("Error occurred on line " + str(lineNumber) + " of file: " + htmlFilePath)    
     
 def isOneOfTheAcceptableNonStandardFiles(filePath):
     isOkNonStandard = False
@@ -206,7 +199,9 @@ def checkFile(filePath):
 paramDictionary = parseArgs()
 
 if(os.path.exists(paramDictionary[dirArg])):    
+    print("Processing " + paramDictionary[dirArg])
     allDirs = findAllDirectories(paramDictionary[dirArg])
+    print(str(allDirs))
     for d in allDirs:        
         if(directoryContainsAHtmlFile(d)):
             hasRequiredDirsAndFiles(d)
