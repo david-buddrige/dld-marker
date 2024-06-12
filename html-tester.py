@@ -90,7 +90,7 @@ def findAllFiles(dirToCheck):
 def checkForUpper(folderName):
     fod = os.path.basename(folderName)
     if(fod.islower()==False):
-        print("The folder \"" + folderName + "\" includes upper case characters in violation of standards")
+        print("UPPER CASE FOLDERNAME: The folder \"" + folderName + "\" includes upper case characters in violation of standards")
 
 def hasRequiredDirsAndFiles(dirToCheck):
     hasCss = False
@@ -193,7 +193,7 @@ def testAHtmlFile(htmlFilePath):
         except Exception as ex:
             # template = "An exception of type {0} occurred. Arguments:\n{1!r}"
             # message = template.format(type(ex).__name__, ex.args)
-            print("Exception of type : " + str(type(ex).__name__ )) 
+            print("POSSIBLE FOREIGN UNICODE: Exception of type : " + str(type(ex).__name__ )) 
             print("Error occurred on line " + str(lineNumber) + " of file: " + htmlFilePath)    
     
 def isOneOfTheAcceptableNonStandardFiles(filePath):
