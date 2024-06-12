@@ -166,11 +166,12 @@ def testAHtmlFile(htmlFilePath):
                 testForSpan(textline,lineNumber, htmlFilePath)
                     
                 # test for <img> without alt property
-                hasImg = re.search("<img\\s", textline, re.RegexFlag.IGNORECASE)
-                if(hasImg):
-                    hasAlt = re.search("alt=",textline, re.RegexFlag.IGNORECASE)
-                    if(hasAlt == False):
-                        print("<img> missing alt on line "  + str(lineNumber) + " of file: " + htmlFilePath)
+                # Note that this will not register <img> tags where the tag has been broken over more than one line
+                hasImg = re.search("<img\\s.+>", textline, re.RegexFlag.IGNORECASE)
+                if(hasImg):                    
+                    hasAlt = re.search("\\salt[\\s]*=",textline, re.RegexFlag.IGNORECASE)
+                    if(hasAlt == None):
+                        print("MISSING ALT: <img> missing alt on line "  + str(lineNumber) + " of file: " + htmlFilePath)
                         print(textline)
                             
                 # Check for uppercase tags
