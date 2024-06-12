@@ -1,0 +1,225 @@
+# Programmer : David Buddrige
+# Purpose    : This program applies a series of tests on HTML files
+#              using regular expressions to identify common errors
+#              that would result in a student needing to fix and
+#              resubmit their code.
+
+import os
+import sys
+import re
+
+class Messsage:
+    def __init__(self,message,lineNum):
+        self.line = lineNum
+        self.message = message
+
+outputMessageArray = [] 
+
+def addMessage(message):
+    outputMessageArray.append(message)
+
+def printMessages():
+    for m in outputMessageArray:
+        print(m)
+
+
+dirArg = '-dir'
+pingDocsArg = '-pingDocs'
+requiredParamArray = [dirArg]
+optionalParmArray = [pingDocsArg]
+
+def isAParam(theParam):    
+    retVal = False
+    paramsToCheck = requiredParamArray + optionalParmArray
+    for p in paramsToCheck:
+        if(theParam == p):
+            retVal = True
+    return retVal
+
+def parseArgs():
+    paramDict = { 
+        pingDocsArg: False
+    }
+    nextP = None
+    for p in sys.argv:
+        if(p != ".\\html-tester.py"):            
+            if(isAParam(p)):
+                nextP = p
+                if(p == pingDocsArg):
+                    # the -pingDocs parameter is an on/off setting and takes no arguments
+                    paramDict[p] = True
+                    nextP = None
+            elif(nextP != None):
+                paramDict[nextP] = p
+                nextP = None
+            else:            
+                message = "Parameter " + p + " is undefined"
+                print(message)
+    for p in requiredParamArray:
+        if(not (p in paramDict)):            
+            print("Parameter " + p + " is missing!")
+            sys.exit()
+    return paramDict
+
+def isValidDirOrFile(dirToCheck):
+    isValid = True
+    invalidDirs = ['__MACOSX','.git','.idea','.gitignore','.vscode']
+    for inv in invalidDirs:
+        isaMatch = re.search(inv,dirToCheck)
+        if(isaMatch):
+            isValid = False
+    return isValid
+           
+
+def findAllDirectories(dirToFind):    
+    listOfDirs = []
+    if(isValidDirOrFile(dirToFind)):
+        listOfDirs = [dirToFind]    
+        allFilesAndDirs = os.listdir(dirToFind)
+        for fod in allFilesAndDirs:
+            subPath = dirToFind + os.path.sep + fod
+            if(os.path.isdir(subPath)):            
+                subList = findAllDirectories(subPath)
+                listOfDirs = listOfDirs + subList
+    return listOfDirs
+
+
+def findAllFiles(dirToCheck):
+    listOfFiles = []
+    allFilesAndDirs = os.listdir(dirToCheck)
+    for fod in allFilesAndDirs:
+        if(isValidDirOrFile(fod)):
+            subPath = dirToCheck + os.path.sep + fod
+            if(os.path.isfile(subPath)):
+                listOfFiles.append(subPath)
+    return listOfFiles
+
+def hasRequiredDirsAndFiles(dirToCheck):
+    hasCss = False
+    hasImages = False
+    hasJs = False
+    hasIndex = False
+    allFilesAndDirs = os.listdir(dirToCheck)
+    for fod in allFilesAndDirs:
+        if(os.path.isfile(dirToCheck + os.path.sep + fod)):
+            checkFile(dirToCheck + os.path.sep + fod)
+            if(fod=='index.html'):
+                hasIndex = True
+        else:          
+            if(fod == 'css'):
+                hasCss = True
+            if(fod == 'js'):
+                hasJs = True
+            if(fod == 'img' or fod == 'images'):
+                hasImages = True
+            
+    if(hasCss==False):
+        print("Directory \"" + dirToCheck + "\" is missing a css folder in violation of standards")
+    if(hasJs==False):
+        print("Directory \"" + dirToCheck + "\" is missing a js folder in violation of standards")
+    if(hasImages==False):
+        print("Directory \"" + dirToCheck + "\" is missing an images folder in violation of standards")
+    if(hasIndex==False):
+        print("Directory \"" + dirToCheck + "\" is missing an index.html file in violation of standards")
+           
+def testForSpan(htmlLine, lineNumber, htmlFile):
+    # Check for <span>
+    hasSpan = re.search("<span", htmlLine, re.RegexFlag.IGNORECASE)
+    if(hasSpan):
+        print("<span> found on line "  + str(lineNumber) + " of file: \"" + htmlFile + "\" in violation of standards.")
+        print(htmlLine)
+   
+def directoryContainsAHtmlFile(dirToCheck):
+    hasAHtmlFile = False
+    allFilesAndDirs = os.listdir(dirToCheck)
+    for fod in allFilesAndDirs:
+        if(re.search("html$",fod,re.RegexFlag.IGNORECASE)):
+            print("Found at least one html file \"" + fod + "\" in directory: \"" + dirToCheck + "\".  This directory is assumed to be a website, and will be checked accordingly.")
+            hasAHtmlFile = True
+            break
+    return hasAHtmlFile   
+
+            
+def testAHtmlFile(htmlFilePath):
+    divCount = 0
+    lineNumber = 0
+    with open(htmlFilePath) as theHtmlFile:
+        try:
+            for textline in theHtmlFile:
+                lineNumber += 1
+                # Check for many <div> elements
+                hasDiv = re.search("<div", textline, re.RegexFlag.IGNORECASE)
+                if(hasDiv):
+                    divCount += 1
+                    if(divCount > 1):
+                        print("More than one <div> found on line " + str(lineNumber) + " of file: " + htmlFilePath + "\" in violation of standards.  This is <div> number " + str(divCount) )
+                        print(textline)
+                
+                # test for <span>    
+                testForSpan(textline,lineNumber, htmlFilePath)
+                    
+                # test for <img> without alt property
+                hasImg = re.search("<img\\s", textline, re.RegexFlag.IGNORECASE)
+                if(hasImg):
+                    hasAlt = re.search("alt=",textline, re.RegexFlag.IGNORECASE)
+                    if(hasAlt == False):
+                        print("<img> missing alt on line "  + str(lineNumber) + " of file: " + htmlFilePath)
+                        print(textline)
+                            
+                # Check for uppercase tags
+                hasUppercaseTag = re.search("<[A-Z]+",textline)
+                if(hasUppercaseTag):
+                    print("Upper case HTML found on line "  + str(lineNumber) + " of file: " + htmlFilePath)
+                    print(textline)
+                        
+                # Check for 
+        
+        except Exception as ex:
+            # template = "An exception of type {0} occurred. Arguments:\n{1!r}"
+            # message = template.format(type(ex).__name__, ex.args)
+            print("Exception of type : " + str(type(ex).__name__ )) 
+            print("Error occurred on line " + str(lineNumber) + " of file: " + htmlFile)    
+    
+def isOneOfTheAcceptableNonStandardFiles(filePath):
+    isOkNonStandard = False
+    if(paramDictionary[pingDocsArg]):
+        isOkNonStandard = False
+    else:    
+        nonStandardFiles = ['.doc$','.docx$','.pdf$','.xls$','.xlsx$','.DS_Store$','.zip$']
+        for nsf in nonStandardFiles:
+            isOk = re.search(nsf,filePath,re.RegexFlag.IGNORECASE)  
+            if(isOk):
+                isOkNonStandard = True
+                break
+    return isOkNonStandard
+        
+            
+def checkFile(filePath):
+    fileNameOnly = os.path.basename(filePath)
+    if(isOneOfTheAcceptableNonStandardFiles(filePath) == False):
+        if(fileNameOnly.islower()==False):
+            print("The file \"" + filePath + "\" contains upper case characters in violation of standards")
+        if(' ' in fileNameOnly):
+            print("The file \"" + filePath + "\" contains space characters in violation of standards")
+    return fileNameOnly
+
+paramDictionary = parseArgs()
+
+if(os.path.exists(paramDictionary[dirArg])):    
+    allDirs = findAllDirectories(paramDictionary[dirArg])
+    for d in allDirs:        
+        if(directoryContainsAHtmlFile(d)):
+            hasRequiredDirsAndFiles(d)
+            filesInDir = findAllFiles(d)
+            for f in filesInDir:
+                try:                
+                    isHtml = re.search("html$",f,re.RegexFlag.IGNORECASE)
+                    if(isHtml):                    
+                        testAHtmlFile(f)                
+                except:
+                    print("Unable to print file from dir \"" + d + "\".  This is most commonly caused by the use of non-english unicode character sets.")
+            print("--------------------------------------------------")
+            print("")
+else:
+    print("Directory " + paramDictionary[dirArg] + " not found.")
+    sys.exit()
