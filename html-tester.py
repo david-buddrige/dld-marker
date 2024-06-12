@@ -26,7 +26,7 @@ def parseArgs():
     paramDict = { 
         pingDocsArg: False
     }
-    print(paramDict)
+    #print(paramDict)
     nextP = None
     #print(sys.argv)
     for p in sys.argv:
@@ -87,6 +87,11 @@ def findAllFiles(dirToCheck):
                 listOfFiles.append(subPath)
     return listOfFiles
 
+def checkForUpper(folderName):
+    fod = os.path.basename(folderName)
+    if(fod.islower()==False):
+        print("The folder \"" + folderName + "\" includes upper case characters in violation of standards")
+
 def hasRequiredDirsAndFiles(dirToCheck):
     hasCss = False
     hasImages = False
@@ -99,11 +104,14 @@ def hasRequiredDirsAndFiles(dirToCheck):
             if(fod=='index.html'):
                 hasIndex = True
         else:          
-            if(fod == 'css'):
+            if(re.match('css$',fod,re.RegexFlag.IGNORECASE)):
+                checkForUpper( dirToCheck + os.path.sep + fod)
                 hasCss = True
             if(fod == 'js'):
+                checkForUpper( dirToCheck + os.path.sep + fod)
                 hasJs = True
             if(fod == 'img' or fod == 'images'):
+                checkForUpper( dirToCheck + os.path.sep + fod)
                 hasImages = True
             
     if(hasCss==False):
@@ -126,10 +134,16 @@ def directoryContainsAHtmlFile(dirToCheck):
     hasAHtmlFile = False
     allFilesAndDirs = os.listdir(dirToCheck)
     for fod in allFilesAndDirs:
-        if(re.search("html$",fod,re.RegexFlag.IGNORECASE)):
-            print("Found at least one html file \"" + fod + "\" in directory: \"" + dirToCheck + "\".  This directory is assumed to be a website, and will be checked accordingly.")
-            hasAHtmlFile = True
-            break
+        if(os.path.isfile(dirToCheck + os.path.sep + fod)):
+            if(re.search("html$",fod,re.RegexFlag.IGNORECASE)):
+                # Then we have found at least one html file.  This directory is assumed to be a website, and will be checked accordingly."   
+                print("")             
+                print("===================================================================================================================")
+                print("Processing website directory: \"" + dirToCheck + os.path.sep + fod + "\"")
+                print("===================================================================================================================")
+                      
+                hasAHtmlFile = True
+                break
     return hasAHtmlFile   
 
             
@@ -212,7 +226,7 @@ if(os.path.exists(paramDictionary[dirArg])):
                         testAHtmlFile(f)                
                 except:
                     print("Unable to print file from dir \"" + d + "\".  This is most commonly caused by the use of non-english unicode character sets.")
-            print("--------------------------------------------------")
+            print(" -------------------------------------------- END OF WEBSITE PROCESSING -------------------------------------------")
             print("")
 else:
     print("Directory " + paramDictionary[dirArg] + " not found.")
