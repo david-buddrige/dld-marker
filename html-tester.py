@@ -21,7 +21,7 @@ class MessageType(Enum):
 
 def printMessage(messageType: MessageType, message):
     
-    print(messageType.value + ",\"" + message + "\"")
+    print(messageType.value + ",\"" + message.strip() + "\"")
 
 
 def isAParam(theParam):    
