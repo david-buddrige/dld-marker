@@ -263,8 +263,6 @@ if(os.path.exists(paramDictionary[dirArg])):
                         testAHtmlFile(f)
                 except:
                     print("POSSIBLE FOREIGN UNICODE: Unable to print file from dir \"" + d + "\".  This is most commonly caused by the use of non-english unicode character sets.")
-                                
-                 
             print(" -------------------------------------------- END OF WEBSITE PROCESSING -------------------------------------------")
             print("")
 else:
