@@ -160,6 +160,7 @@ def directoryContainsAHtmlFile(dirToCheck):
 
             
 def testAHtmlFile(htmlFilePath):
+    print("Testing html file \"" + htmlFilePath + "\"")
     divCount = 0
     lineNumber = 0
     with open(htmlFilePath) as theHtmlFile:
@@ -173,7 +174,7 @@ def testAHtmlFile(htmlFilePath):
                     if(divCount > 1):
                         print("MULTIPLE <DIV> LOCATED: More than one <div> found on line " + str(lineNumber) + " of file: " + htmlFilePath + "\" in violation of standards.  This is <div> number " + str(divCount) )
                         print(textline)
-                
+            
                 # test for <span>    
                 testForSpan(textline,lineNumber, htmlFilePath)
                     
@@ -192,14 +193,13 @@ def testAHtmlFile(htmlFilePath):
                         if(hasAlt == None):
                             print("POSSIBLE MISSING ALT - check next line of html: <img> missing alt on line "  + str(lineNumber) + " of file: " + htmlFilePath)
                             print(textline)
-                    
-                            
+                
                 # Check for uppercase tags
                 hasUppercaseTag = re.search("<[A-Z]+",textline)
                 if(hasUppercaseTag):
                     print("UPPER CASE HTML: found on line "  + str(lineNumber) + " of file: " + htmlFilePath)
                     print(textline)
-                        
+                
                 # Check for 
         
         except Exception as ex:
