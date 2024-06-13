@@ -7,16 +7,26 @@
 import os
 import sys
 import re
+from enum import Enum
 
 dirArg = '-dir'
 pingDocsArg = '-pingDocs'
 requiredParamArray = [dirArg]
 optionalParmArray = [pingDocsArg]
 
+class MessageType(Enum):
+    INFO = "INFO"
+    WARNING = "WARNING"
+    ERROR = "ERROR"
+
+def printMessage(messageType: MessageType, message):
+    
+    print(messageType.value + ",\"" + message + "\"")
+
+
 def isAParam(theParam):    
     retVal = False
     paramsToCheck = requiredParamArray + optionalParmArray
-    #print("Checking " + str(paramsToCheck))
     for p in paramsToCheck:
         if(theParam == p):
             retVal = True
@@ -26,21 +36,19 @@ def parseArgs():
     paramDict = { 
         pingDocsArg: False
     }
-    #print(paramDict)
     nextP = None
-    #print(sys.argv)
     for p in sys.argv:
         isMainProgram = re.search("html-tester.py",p)
         if(isMainProgram):            
-            print("Running " + p)
+            printMessage(MessageType.INFO, "Running " + p)
         else:
-            #print("Loading " + p)
             if(isAParam(p)):
-                nextP = p
                 if(p == pingDocsArg):
                     # the -pingDocs parameter is an on/off setting and takes no arguments
                     paramDict[p] = True
                     nextP = None
+                else:
+                    nextP = p
             elif(nextP != None):
                 paramDict[nextP] = p
                 nextP = None
@@ -59,7 +67,6 @@ def isValidDirOrFile(dirToCheck):
     for inv in invalidDirs:
         isaMatch = re.search(inv,dirToCheck)
         if(isaMatch):
-            #print("Matched " + inv + " with " + dirToCheck)
             isValid = False
     return isValid
            
@@ -90,9 +97,9 @@ def findAllFiles(dirToCheck):
 def checkForUpper(folderName):
     fod = os.path.basename(folderName)
     if(fod.islower()==False):
-        print("UPPER CASE FOLDERNAME: The folder \"" + folderName + "\" includes upper case characters in violation of standards")
+        printMessage(MessageType.ERROR,"UPPER CASE FOLDERNAME: The folder '" + folderName + "' includes upper case characters in violation of standards")
     else:
-        print("Folder \"" + folderName + "\" is OK")
+        printMessage(MessageType.INFO,"Folder '" + folderName + "' is OK")
 
 def hasRequiredDirsAndFiles(dirToCheck):
     hasCss = False
@@ -119,17 +126,17 @@ def hasRequiredDirsAndFiles(dirToCheck):
                 hasImages = True
             
     if(hasCss==False):
-        print("MISSING CSS DIRECTORY: Directory \"" + dirToCheck + "\" is missing a css folder in violation of standards")
+        printMessage(MessageType.ERROR,"MISSING CSS DIRECTORY: Directory '" + dirToCheck + "' is missing a css folder in violation of standards")
     else:
-        print("css folder found")
+        printMessage(MessageType.INFO,"css folder found")
     if(hasJs==False):
-        print("MISSING JS DIRECTORY: Directory \"" + dirToCheck + "\" is missing a js folder in violation of standards")
+        printMessage(MessageType.ERROR,"MISSING JS DIRECTORY: Directory '" + dirToCheck + "' is missing a js folder in violation of standards")
     else:
-        print("js folder found")
+        printMessage(MessageType.INFO,"js folder found")
     if(hasImages==False):
-        print("MISSING IMAGES DIRECTORY: Directory \"" + dirToCheck + "\" is missing an images folder in violation of standards")
+        printMessage(MessageType.ERROR,"MISSING IMAGES DIRECTORY: Directory '" + dirToCheck + "' is missing an images folder in violation of standards")
     else:
-        print(imgFolder + " folder found")
+        printMessage(MessageType.INFO,imgFolder + " folder found")
         imgDirsInWebsite = allDirs = findAllDirectories(dirToCheck + os.path.sep + imgFolder)
         for diw in imgDirsInWebsite:
             fid = findAllFiles(diw)               
@@ -138,16 +145,16 @@ def hasRequiredDirsAndFiles(dirToCheck):
                
         
     if(hasIndex==False):
-        print("MISSING INDEX.HTML: Directory \"" + dirToCheck + "\" is missing an index.html file in violation of standards")
+        printMessage(MessageType.ERROR,"MISSING INDEX.HTML: Directory '" + dirToCheck + "' is missing an index.html file in violation of standards")
     else:
-        print("index.html found")
+        printMessage(MessageType.INFO,"index.html found")
            
 def testForSpan(htmlLine, lineNumber, htmlFile):
     # Check for <span>
     hasSpan = re.search("<span", htmlLine, re.RegexFlag.IGNORECASE)
     if(hasSpan):
-        print("<SPAN> LOCATED: <span> found on line "  + str(lineNumber) + " of file: \"" + htmlFile + "\" in violation of standards.")
-        print(htmlLine)
+        printMessage(MessageType.ERROR,"<SPAN> LOCATED: <span> found on line "  + str(lineNumber) + " of file: '" + htmlFile + "' in violation of standards.")
+        printMessage(MessageType.ERROR,htmlLine)
    
 def directoryContainsAHtmlFile(dirToCheck):
     hasAHtmlFile = False
@@ -156,10 +163,10 @@ def directoryContainsAHtmlFile(dirToCheck):
         if(os.path.isfile(dirToCheck + os.path.sep + fod)):
             if(re.search("html$",fod,re.RegexFlag.IGNORECASE)):
                 # Then we have found at least one html file.  This directory is assumed to be a website, and will be checked accordingly."   
-                print("")             
-                print("===================================================================================================================")
-                print("Processing website directory: \"" + dirToCheck + os.path.sep + fod + "\"")
-                print("===================================================================================================================")
+                printMessage(MessageType.INFO,"")             
+                printMessage(MessageType.INFO,"===================================================================================================================")
+                printMessage(MessageType.INFO,"Processing website directory: '" + dirToCheck + os.path.sep + fod + "'")
+                printMessage(MessageType.INFO,"===================================================================================================================")
                       
                 hasAHtmlFile = True
                 break
@@ -167,7 +174,7 @@ def directoryContainsAHtmlFile(dirToCheck):
 
             
 def testAHtmlFile(htmlFilePath):
-    print("Testing html file \"" + htmlFilePath + "\"")
+    printMessage(MessageType.INFO,"Testing html file '" + htmlFilePath + "'")
     divCount = 0
     lineNumber = 0
     with open(htmlFilePath) as theHtmlFile:
@@ -179,8 +186,8 @@ def testAHtmlFile(htmlFilePath):
                 if(hasDiv):
                     divCount += 1
                     if(divCount > 1):
-                        print("MULTIPLE <DIV> LOCATED: More than one <div> found on line " + str(lineNumber) + " of file: " + htmlFilePath + "\" in violation of standards.  This is <div> number " + str(divCount) )
-                        print(textline)
+                        printMessage(MessageType.ERROR,"MULTIPLE <DIV> LOCATED: More than one <div> found on line " + str(lineNumber) + " of file: " + htmlFilePath + "' in violation of standards.  This is <div> number " + str(divCount) )
+                        printMessage(MessageType.ERROR,textline)
             
                 # test for <span>    
                 testForSpan(textline,lineNumber, htmlFilePath)
@@ -191,29 +198,29 @@ def testAHtmlFile(htmlFilePath):
                 if(hasImg != None):                    
                     hasAlt = re.search("\\salt[\\s]*=",textline, re.RegexFlag.IGNORECASE)
                     if(hasAlt == None):
-                        print("MISSING ALT: <img> missing alt on line "  + str(lineNumber) + " of file: " + htmlFilePath)
-                        print(textline)
+                        printMessage(MessageType.ERROR,"MISSING ALT: <img> missing alt on line "  + str(lineNumber) + " of file: " + htmlFilePath)
+                        printMessage(MessageType.ERROR,textline)
                 else:
                     hasImg = re.search("<img\\s", textline, re.RegexFlag.IGNORECASE)
                     if(hasImg != None):
                         hasAlt = re.search("\\salt[\\s]*=",textline, re.RegexFlag.IGNORECASE)
                         if(hasAlt == None):
-                            print("POSSIBLE MISSING ALT - check next line of html: <img> missing alt on line "  + str(lineNumber) + " of file: " + htmlFilePath)
-                            print(textline)
+                            printMessage(MessageType.ERROR,"POSSIBLE MISSING ALT - check next line of html: <img> missing alt on line "  + str(lineNumber) + " of file: " + htmlFilePath)
+                            printMessage(MessageType.ERROR,textline)
                 
                 # Check for uppercase tags
                 hasUppercaseTag = re.search("<[A-Z]+",textline)
                 if(hasUppercaseTag):
-                    print("UPPER CASE HTML: found on line "  + str(lineNumber) + " of file: " + htmlFilePath)
-                    print(textline)
+                    printMessage(MessageType.ERROR,"UPPER CASE HTML: found on line "  + str(lineNumber) + " of file: " + htmlFilePath)
+                    printMessage(MessageType.ERROR,textline)
                 
                 # Check for 
         
         except Exception as ex:
             # template = "An exception of type {0} occurred. Arguments:\n{1!r}"
             # message = template.format(type(ex).__name__, ex.args)
-            print("POSSIBLE FOREIGN UNICODE: Exception of type : " + str(type(ex).__name__ )) 
-            print("Error occurred on line " + str(lineNumber) + " of file: " + htmlFilePath)    
+            printMessage(MessageType.ERROR,"POSSIBLE FOREIGN UNICODE: Exception of type : " + str(type(ex).__name__ )) 
+            printMessage(MessageType.ERROR,"Error occurred on line " + str(lineNumber) + " of file: " + htmlFilePath)    
     
 def isOneOfTheAcceptableNonStandardFiles(filePath):
     isOkNonStandard = False
@@ -224,7 +231,7 @@ def isOneOfTheAcceptableNonStandardFiles(filePath):
         for nsf in nonStandardFiles:
             isOk = re.search(nsf,filePath,re.RegexFlag.IGNORECASE)  
             if(isOk):
-                print('File: \"' + filePath + '\" is ignored.')
+                printMessage(MessageType.INFO,"File: '" + filePath + "' is ignored.")
                 isOkNonStandard = True
                 break
     return isOkNonStandard
@@ -234,23 +241,26 @@ def checkFile(filePath):
     fileNameOnly = os.path.basename(filePath)
     if(isOneOfTheAcceptableNonStandardFiles(filePath) == False):
         if(fileNameOnly.islower()==False):
-            print("UPPER CASE FILENAME: The file \"" + filePath + "\" contains upper case characters in violation of standards")
+            printMessage(MessageType.ERROR,"UPPER CASE FILENAME: The file '" + filePath + "' contains upper case characters in violation of standards")
         if(' ' in fileNameOnly):
-            print("SPACES IN FILENAME: The file \"" + filePath + "\" contains space characters in violation of standards")
+            printMessage(MessageType.ERROR,"SPACES IN FILENAME: The file '" + filePath + "' contains space characters in violation of standards")
     return fileNameOnly
 
 def checkIfImage(imageFilename):
     isImage = re.search("jpg$|gif$|png$|svg$",imageFilename,re.RegexFlag.IGNORECASE)
     if(isImage != None):
-        print("Check image file: " + imageFilename)
+        printMessage(MessageType.INFO,"Check image file: " + imageFilename)
         fileSize = os.path.getsize(imageFilename)
-        if(fileSize > 300000):
-            print("IMAGE TOO BIG: The file \"" + imageFilename + "\" has a filesize of " + str(fileSize))
+        if(fileSize > 307200):
+            printMessage(MessageType.ERROR,"IMAGE TOO BIG: The file '" + imageFilename + "' has a filesize of " + str(fileSize))
+        else:
+            if(fileSize > 60000):
+                printMessage(MessageType.WARNING,"WARNING - IMAGE MIGHT BE TOO BIG: Most images should be less than 60 kilobytes, unless they're a background image. The file '" + imageFilename + "' has a filesize of " + str(fileSize))
 
 paramDictionary = parseArgs()
 
 if(os.path.exists(paramDictionary[dirArg])):    
-    print("Processing " + paramDictionary[dirArg])
+    printMessage(MessageType.INFO,"Processing " + paramDictionary[dirArg])
     allDirs = findAllDirectories(paramDictionary[dirArg])    
     for d in allDirs:        
         if(directoryContainsAHtmlFile(d)):
@@ -262,9 +272,9 @@ if(os.path.exists(paramDictionary[dirArg])):
                     if(isHtml):                    
                         testAHtmlFile(f)
                 except:
-                    print("POSSIBLE FOREIGN UNICODE: Unable to print file from dir \"" + d + "\".  This is most commonly caused by the use of non-english unicode character sets.")
-            print(" -------------------------------------------- END OF WEBSITE PROCESSING -------------------------------------------")
-            print("")
+                    printMessage(MessageType.WARNING,"POSSIBLE FOREIGN UNICODE: Unable to print file from dir '" + d + "'.  This is most commonly caused by the use of non-english unicode character sets.")
+            printMessage(MessageType.INFO," -------------------------------------------- END OF WEBSITE PROCESSING -------------------------------------------")
+            printMessage(MessageType.INFO,"")
 else:
     print("Directory " + paramDictionary[dirArg] + " not found.")
     sys.exit()
