@@ -91,10 +91,13 @@ def checkForUpper(folderName):
     fod = os.path.basename(folderName)
     if(fod.islower()==False):
         print("UPPER CASE FOLDERNAME: The folder \"" + folderName + "\" includes upper case characters in violation of standards")
+    else:
+        print("Folder \"" + folderName + "\" is OK")
 
 def hasRequiredDirsAndFiles(dirToCheck):
     hasCss = False
     hasImages = False
+    imgFolder = ""
     hasJs = False
     hasIndex = False
     allFilesAndDirs = os.listdir(dirToCheck)
@@ -111,17 +114,26 @@ def hasRequiredDirsAndFiles(dirToCheck):
                 checkForUpper( dirToCheck + os.path.sep + fod)
                 hasJs = True
             if(fod == 'img' or fod == 'images'):
+                imgFolder = fod
                 checkForUpper( dirToCheck + os.path.sep + fod)
                 hasImages = True
             
     if(hasCss==False):
         print("MISSING CSS DIRECTORY: Directory \"" + dirToCheck + "\" is missing a css folder in violation of standards")
+    else:
+        print("css folder found")
     if(hasJs==False):
         print("MISSING JS DIRECTORY: Directory \"" + dirToCheck + "\" is missing a js folder in violation of standards")
+    else:
+        print("js folder found")
     if(hasImages==False):
         print("MISSING IMAGES DIRECTORY: Directory \"" + dirToCheck + "\" is missing an images folder in violation of standards")
+    else:
+        print(imgFolder + " folder found")
     if(hasIndex==False):
         print("MISSING INDEX.HTML: Directory \"" + dirToCheck + "\" is missing an index.html file in violation of standards")
+    else:
+        print("index.html found")
            
 def testForSpan(htmlLine, lineNumber, htmlFile):
     # Check for <span>
@@ -205,6 +217,7 @@ def isOneOfTheAcceptableNonStandardFiles(filePath):
         for nsf in nonStandardFiles:
             isOk = re.search(nsf,filePath,re.RegexFlag.IGNORECASE)  
             if(isOk):
+                print('File: \"' + filePath + '\" is accepted.')
                 isOkNonStandard = True
                 break
     return isOkNonStandard
