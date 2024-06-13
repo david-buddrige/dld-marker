@@ -15,6 +15,7 @@ requiredParamArray = [dirArg]
 optionalParmArray = [pingDocsArg]
 
 class MessageType(Enum):
+    LABEL = "LABEL"
     INFO = "INFO"
     WARNING = "WARNING"
     ERROR = "ERROR"
@@ -163,10 +164,10 @@ def directoryContainsAHtmlFile(dirToCheck):
         if(os.path.isfile(dirToCheck + os.path.sep + fod)):
             if(re.search("html$",fod,re.RegexFlag.IGNORECASE)):
                 # Then we have found at least one html file.  This directory is assumed to be a website, and will be checked accordingly."   
-                printMessage(MessageType.INFO,"")             
-                printMessage(MessageType.INFO,"===================================================================================================================")
-                printMessage(MessageType.INFO,"Processing website directory: '" + dirToCheck + os.path.sep + fod + "'")
-                printMessage(MessageType.INFO,"===================================================================================================================")
+                printMessage(MessageType.LABEL,"")             
+                printMessage(MessageType.LABEL,"===================================================================================================================")
+                printMessage(MessageType.LABEL,"Processing website directory: '" + dirToCheck + os.path.sep + fod + "'")
+                printMessage(MessageType.LABEL,"===================================================================================================================")
                       
                 hasAHtmlFile = True
                 break
@@ -257,6 +258,7 @@ def checkIfImage(imageFilename):
             if(fileSize > 60000):
                 printMessage(MessageType.WARNING,"WARNING - IMAGE MIGHT BE TOO BIG: Most images should be less than 60 kilobytes, unless they're a background image. The file '" + imageFilename + "' has a filesize of " + str(fileSize))
 
+print("MessageCode, Message")
 paramDictionary = parseArgs()
 
 if(os.path.exists(paramDictionary[dirArg])):    
@@ -273,8 +275,8 @@ if(os.path.exists(paramDictionary[dirArg])):
                         testAHtmlFile(f)
                 except:
                     printMessage(MessageType.WARNING,"POSSIBLE FOREIGN UNICODE: Unable to print file from dir '" + d + "'.  This is most commonly caused by the use of non-english unicode character sets.")
-            printMessage(MessageType.INFO," -------------------------------------------- END OF WEBSITE PROCESSING -------------------------------------------")
-            printMessage(MessageType.INFO,"")
+            printMessage(MessageType.LABEL," -------------------------------------------- END OF WEBSITE PROCESSING -------------------------------------------")
+            printMessage(MessageType.LABEL,"")
 else:
     print("Directory " + paramDictionary[dirArg] + " not found.")
     sys.exit()
