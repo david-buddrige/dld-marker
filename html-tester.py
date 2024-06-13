@@ -130,6 +130,13 @@ def hasRequiredDirsAndFiles(dirToCheck):
         print("MISSING IMAGES DIRECTORY: Directory \"" + dirToCheck + "\" is missing an images folder in violation of standards")
     else:
         print(imgFolder + " folder found")
+        imgDirsInWebsite = allDirs = findAllDirectories(dirToCheck + os.path.sep + imgFolder)
+        for diw in imgDirsInWebsite:
+            fid = findAllFiles(diw)               
+            for imgFile in fid:
+                checkIfImage(imgFile) 
+               
+        
     if(hasIndex==False):
         print("MISSING INDEX.HTML: Directory \"" + dirToCheck + "\" is missing an index.html file in violation of standards")
     else:
@@ -217,7 +224,7 @@ def isOneOfTheAcceptableNonStandardFiles(filePath):
         for nsf in nonStandardFiles:
             isOk = re.search(nsf,filePath,re.RegexFlag.IGNORECASE)  
             if(isOk):
-                print('File: \"' + filePath + '\" is accepted.')
+                print('File: \"' + filePath + '\" is ignored.')
                 isOkNonStandard = True
                 break
     return isOkNonStandard
@@ -232,6 +239,14 @@ def checkFile(filePath):
             print("SPACES IN FILENAME: The file \"" + filePath + "\" contains space characters in violation of standards")
     return fileNameOnly
 
+def checkIfImage(imageFilename):
+    isImage = re.search("jpg$|gif$|png$|svg$",imageFilename,re.RegexFlag.IGNORECASE)
+    if(isImage != None):
+        print("Check image file: " + imageFilename)
+        fileSize = os.path.getsize(imageFilename)
+        if(fileSize > 300000):
+            print("IMAGE TOO BIG: The file \"" + imageFilename + "\" has a filesize of " + str(fileSize))
+
 paramDictionary = parseArgs()
 
 if(os.path.exists(paramDictionary[dirArg])):    
@@ -245,9 +260,11 @@ if(os.path.exists(paramDictionary[dirArg])):
                 try:                
                     isHtml = re.search("html$",f,re.RegexFlag.IGNORECASE)
                     if(isHtml):                    
-                        testAHtmlFile(f)                
+                        testAHtmlFile(f)
                 except:
                     print("POSSIBLE FOREIGN UNICODE: Unable to print file from dir \"" + d + "\".  This is most commonly caused by the use of non-english unicode character sets.")
+                                
+                 
             print(" -------------------------------------------- END OF WEBSITE PROCESSING -------------------------------------------")
             print("")
 else:
