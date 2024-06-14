@@ -13,6 +13,8 @@ dirArg = '-dir'
 pingDocsArg = '-pingDocs'
 requiredParamArray = [dirArg]
 optionalParmArray = [pingDocsArg]
+IMAGE_TOO_BIG = 307200
+IMAGE_SIZE_WARNING = 60000
 
 class MessageType(Enum):
     LABEL = "LABEL"
@@ -252,11 +254,11 @@ def checkIfImage(imageFilename):
     if(isImage != None):
         printMessage(MessageType.INFO,"Check image file: " + imageFilename)
         fileSize = os.path.getsize(imageFilename)
-        if(fileSize > 307200):
-            printMessage(MessageType.ERROR,"IMAGE TOO BIG: The file '" + imageFilename + "' has a filesize of " + str(fileSize))
+        if(fileSize > IMAGE_TOO_BIG):
+            printMessage(MessageType.ERROR,"IMAGE TOO BIG: (" + str(fileSize) + " bytes). The file '" + imageFilename + "' has a filesize of " + str(fileSize) + ".  Images should be less than " + str(IMAGE_TOO_BIG) + " bytes.")
         else:
-            if(fileSize > 60000):
-                printMessage(MessageType.WARNING,"WARNING - IMAGE MIGHT BE TOO BIG: Most images should be less than 60 kilobytes, unless they're a background image. The file '" + imageFilename + "' has a filesize of " + str(fileSize))
+            if(fileSize > IMAGE_SIZE_WARNING):
+                printMessage(MessageType.WARNING,"WARNING - IMAGE MIGHT BE TOO BIG: (" + str(fileSize) + " bytes). Most images should be less than " + str(IMAGE_SIZE_WARNING) + " bytes, unless they're a background image. The file '" + imageFilename + "' has a filesize of " + str(fileSize))
 
 print("MessageCode, Message")
 paramDictionary = parseArgs()
