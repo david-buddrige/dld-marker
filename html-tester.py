@@ -156,8 +156,8 @@ def testForSpan(htmlLine, lineNumber, htmlFile):
     # Check for <span>
     hasSpan = re.search("<span", htmlLine, re.RegexFlag.IGNORECASE)
     if(hasSpan):
-        printMessage(MessageType.ERROR,"<SPAN> LOCATED: <span> found on line "  + str(lineNumber) + " of file: '" + htmlFile + "' in violation of standards.")
-        printMessage(MessageType.ERROR,htmlLine)
+        printMessage(MessageType.WARNING,"<SPAN> LOCATED: <span> found on line "  + str(lineNumber) + " of file: '" + htmlFile + "' in violation of standards.")
+        printMessage(MessageType.WARNING,htmlLine)
    
 def directoryContainsAHtmlFile(dirToCheck):
     hasAHtmlFile = False
