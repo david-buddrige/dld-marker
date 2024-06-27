@@ -2,5 +2,5 @@ Planned improvements for html-tester.py
 
 1. Look for @media query in css files, and display an error or warning if not present
 2. Display an error or warning if there is more than one css file
-3.  
+3. 
 

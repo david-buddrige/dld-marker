@@ -100,9 +100,9 @@ def findAllFiles(dirToCheck):
 def checkForUpper(folderName):
     fod = os.path.basename(folderName)
     if(fod.islower()==False):
-        printMessage(MessageType.ERROR,"UPPER CASE FOLDERNAME: The folder '" + folderName + "' includes upper case characters in violation of standards")
+        printMessage(MessageType.ERROR,"UPPER CASE FOLDERNAME: The folder '" + fod + "' includes upper case characters in violation of standards.  Please correct: " + folderName)
     else:
-        printMessage(MessageType.INFO,"Folder '" + folderName + "' is OK")
+        printMessage(MessageType.INFO,"Folder '" + fod  + "' is OK.")
 
 def hasRequiredDirsAndFiles(dirToCheck):
     hasCss = False
@@ -154,9 +154,10 @@ def hasRequiredDirsAndFiles(dirToCheck):
            
 def testForSpan(htmlLine, lineNumber, htmlFile):
     # Check for <span>
+    fileNameOnly = os.path.basename(htmlFile)
     hasSpan = re.search("<span", htmlLine, re.RegexFlag.IGNORECASE)
     if(hasSpan):
-        printMessage(MessageType.WARNING,"<SPAN> LOCATED: <span> found on line "  + str(lineNumber) + " of file: '" + htmlFile + "' in violation of standards.")
+        printMessage(MessageType.WARNING,fileNameOnly + "(" + str(lineNumber) +  "): <SPAN> LOCATED: <span> found on line "  + str(lineNumber) + " of file: '" + htmlFile + "' in violation of standards.")
         printMessage(MessageType.WARNING,htmlLine)
    
 def directoryContainsAHtmlFile(dirToCheck):
@@ -178,6 +179,8 @@ def directoryContainsAHtmlFile(dirToCheck):
             
 def testAHtmlFile(htmlFilePath):
     printMessage(MessageType.INFO,"Testing html file '" + htmlFilePath + "'")
+    fileNameOnly = os.path.basename(htmlFilePath)
+
     divCount = 0
     lineNumber = 0
     with open(htmlFilePath) as theHtmlFile:
@@ -189,7 +192,7 @@ def testAHtmlFile(htmlFilePath):
                 if(hasDiv):
                     divCount += 1
                     if(divCount > 1):
-                        printMessage(MessageType.ERROR,"MULTIPLE <DIV> LOCATED: More than one <div> found on line " + str(lineNumber) + " of file: " + htmlFilePath + "' in violation of standards.  This is <div> number " + str(divCount) )
+                        printMessage(MessageType.ERROR,fileNameOnly + "(" + str(lineNumber) +  "): MULTIPLE <DIV> LOCATED: More than one <div> found on line " + str(lineNumber) + " of file: " + htmlFilePath + "' in violation of standards.  This is <div> number " + str(divCount) )
                         printMessage(MessageType.ERROR,textline)
             
                 # test for <span>    
@@ -201,23 +204,23 @@ def testAHtmlFile(htmlFilePath):
                 if(hasImg != None):                    
                     hasAlt = re.search("\\salt[\\s]*=",textline, re.RegexFlag.IGNORECASE)
                     if(hasAlt == None):
-                        printMessage(MessageType.ERROR,"MISSING ALT: <img> missing alt on line "  + str(lineNumber) + " of file: " + htmlFilePath)
+                        printMessage(MessageType.ERROR,fileNameOnly + "(" + str(lineNumber) +  "): MISSING ALT: <img> missing alt on line "  + str(lineNumber) + " of file: " + htmlFilePath)
                         printMessage(MessageType.ERROR,textline)
                 else:
                     hasImg = re.search("<img\\s", textline, re.RegexFlag.IGNORECASE)
                     if(hasImg != None):
                         hasAlt = re.search("\\salt[\\s]*=",textline, re.RegexFlag.IGNORECASE)
                         if(hasAlt == None):
-                            printMessage(MessageType.ERROR,"POSSIBLE MISSING ALT - check next line of html: <img> missing alt on line "  + str(lineNumber) + " of file: " + htmlFilePath)
+                            printMessage(MessageType.ERROR,fileNameOnly + "(" + str(lineNumber) +  "): POSSIBLE MISSING ALT - check next line of html: <img> missing alt on line "  + str(lineNumber) + " of file: " + htmlFilePath)
                             printMessage(MessageType.ERROR,textline)
                 
                 # Check for uppercase tags
                 hasUppercaseTag = re.search("<[A-Z]+",textline)
                 if(hasUppercaseTag):
-                    printMessage(MessageType.ERROR,"UPPER CASE HTML: found on line "  + str(lineNumber) + " of file: " + htmlFilePath)
+                    printMessage(MessageType.ERROR,fileNameOnly + "(" + str(lineNumber) +  "): UPPER CASE HTML: found on line "  + str(lineNumber) + " of file: " + htmlFilePath)
                     printMessage(MessageType.ERROR,textline)
                 
-                # Check for 
+                # Check for other things at some point
         
         except Exception as ex:
             # template = "An exception of type {0} occurred. Arguments:\n{1!r}"
@@ -244,9 +247,9 @@ def checkFile(filePath):
     fileNameOnly = os.path.basename(filePath)
     if(isOneOfTheAcceptableNonStandardFiles(filePath) == False):
         if(fileNameOnly.islower()==False):
-            printMessage(MessageType.ERROR,"UPPER CASE FILENAME: The file '" + filePath + "' contains upper case characters in violation of standards")
+            printMessage(MessageType.ERROR,"UPPER CASE FILENAME: '" + fileNameOnly + "'. The file '" + filePath + "' contains upper case characters in violation of standards")
         if(' ' in fileNameOnly):
-            printMessage(MessageType.ERROR,"SPACES IN FILENAME: The file '" + filePath + "' contains space characters in violation of standards")
+            printMessage(MessageType.ERROR,"SPACES IN FILENAME: '" + fileNameOnly + "'. The file '" + filePath + "' contains space characters in violation of standards")
     return fileNameOnly
 
 def checkIfImage(imageFilename):
@@ -258,7 +261,7 @@ def checkIfImage(imageFilename):
             printMessage(MessageType.ERROR,"IMAGE TOO BIG: (" + str(fileSize) + " bytes). The file '" + imageFilename + "' has a filesize of " + str(fileSize) + ".  Images should be less than " + str(IMAGE_TOO_BIG) + " bytes.")
         else:
             if(fileSize > IMAGE_SIZE_WARNING):
-                printMessage(MessageType.WARNING,"WARNING - IMAGE MIGHT BE TOO BIG: (" + str(fileSize) + " bytes). Most images should be less than " + str(IMAGE_SIZE_WARNING) + " bytes, unless they're a background image. The file '" + imageFilename + "' has a filesize of " + str(fileSize))
+                printMessage(MessageType.WARNING,"IMAGE MIGHT BE TOO BIG: (" + str(fileSize) + " bytes). Most images should be less than " + str(IMAGE_SIZE_WARNING) + " bytes, unless they're a background image. The file '" + imageFilename + "' has a filesize of " + str(fileSize))
 
 print("MessageCode, Message")
 paramDictionary = parseArgs()
