@@ -262,6 +262,11 @@ def checkIfImage(imageFilename):
         else:
             if(fileSize > IMAGE_SIZE_WARNING):
                 printMessage(MessageType.WARNING,"IMAGE MIGHT BE TOO BIG: (" + str(fileSize) + " bytes). Most images should be less than " + str(IMAGE_SIZE_WARNING) + " bytes, unless they're a background image. The file '" + imageFilename + "' has a filesize of " + str(fileSize))
+        # Check for capital letters or spaces in the filename.
+        fileNameOnly = os.path.basename(imageFilename)
+        hasUpperCaseFilename = re.search("[A-Z]+",fileNameOnly)
+        if(hasUpperCaseFilename):
+            printMessage(MessageType.ERROR,"UPPER CASE filename: " + fileNameOnly  + " found at: " + imageFilename)                    
 
 print("MessageCode, Message")
 paramDictionary = parseArgs()
