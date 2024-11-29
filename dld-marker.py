@@ -221,7 +221,14 @@ def testAHtmlFile(htmlFilePath, paramsDictionaryToUse):
                         if(hasAlt == None):
                             printMessage(MessageType.ERROR,fileNameOnly + "(" + str(lineNumber) +  "): POSSIBLE MISSING ALT - check next line of html: <img> missing alt on line "  + str(lineNumber) + " of file: " + htmlFilePath)
                             printMessage(MessageType.ERROR,textline)
-                
+                        hasHeight = re.search("\\sheight[\\s]*=",textline, re.RegexFlag.IGNORECASE)
+                        if(hasHeight != None):
+                            printMessage(MessageType.ERROR,fileNameOnly + "(" + str(lineNumber) +  "): HEIGHT PROPERTY IN HTML- The height property should be specified in your css, not in your html."  + str(lineNumber) + " of file: " + htmlFilePath)
+                            printMessage(MessageType.ERROR,textline)
+                        hasWidth = re.search("\\swidth[\\s]*=",textline, re.RegexFlag.IGNORECASE)
+                        if(hasWidth != None):
+                            printMessage(MessageType.ERROR,fileNameOnly + "(" + str(lineNumber) +  "): WIDTH PROPERTY IN HTML- The width property should be specified in your css, not in your html."  + str(lineNumber) + " of file: " + htmlFilePath)
+                            printMessage(MessageType.ERROR,textline)                
                 # Check for uppercase tags
                 hasUppercaseTag = re.search("<[A-Z]+",textline)
                 if(hasUppercaseTag):
