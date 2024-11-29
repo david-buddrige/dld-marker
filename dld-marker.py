@@ -11,8 +11,9 @@ from enum import Enum
 
 dirArg = '-dir'
 pingDocsArg = '-pingDocs'
+webDevArg = '-webdev'
 requiredParamArray = [dirArg]
-optionalParmArray = [pingDocsArg]
+optionalParmArray = [pingDocsArg,webDevArg]
 IMAGE_TOO_BIG = 307200
 IMAGE_SIZE_WARNING = 60000
 
@@ -37,7 +38,8 @@ def isAParam(theParam):
 
 def parseArgs():
     paramDict = { 
-        pingDocsArg: False
+        pingDocsArg: False,
+        webDevArg: False
     }
     nextP = None
     for p in sys.argv:
@@ -48,6 +50,10 @@ def parseArgs():
             if(isAParam(p)):
                 if(p == pingDocsArg):
                     # the -pingDocs parameter is an on/off setting and takes no arguments
+                    paramDict[p] = True
+                    nextP = None
+                elif(p == webDevArg):
+                    # the -webdev parameter is an on/off setting and takes no arguments
                     paramDict[p] = True
                     nextP = None
                 else:
@@ -177,7 +183,7 @@ def directoryContainsAHtmlFile(dirToCheck):
     return hasAHtmlFile   
 
             
-def testAHtmlFile(htmlFilePath):
+def testAHtmlFile(htmlFilePath, paramsDictionaryToUse):
     printMessage(MessageType.INFO,"Testing html file '" + htmlFilePath + "'")
     fileNameOnly = os.path.basename(htmlFilePath)
 
@@ -187,13 +193,15 @@ def testAHtmlFile(htmlFilePath):
         try:
             for textline in theHtmlFile:
                 lineNumber += 1
-                # Check for many <div> elements
-                hasDiv = re.search("<div", textline, re.RegexFlag.IGNORECASE)
-                if(hasDiv):
-                    divCount += 1
-                    if(divCount > 1):
-                        printMessage(MessageType.ERROR,fileNameOnly + "(" + str(lineNumber) +  "): MULTIPLE <DIV> LOCATED: More than one <div> found on line " + str(lineNumber) + " of file: " + htmlFilePath + "' in violation of standards.  This is <div> number " + str(divCount) )
-                        printMessage(MessageType.ERROR,textline)
+                # Check for many <div> elements - but only if the -webdev flag isn't active. 
+                # We allow multiple div's in web dev essentials class.
+                if(paramsDictionaryToUse[webDevArg]==False):
+                    hasDiv = re.search("<div", textline, re.RegexFlag.IGNORECASE)
+                    if(hasDiv):
+                        divCount += 1
+                        if(divCount > 1):
+                            printMessage(MessageType.ERROR,fileNameOnly + "(" + str(lineNumber) +  "): MULTIPLE <DIV> LOCATED: More than one <div> found on line " + str(lineNumber) + " of file: " + htmlFilePath + "' in violation of standards.  This is <div> number " + str(divCount) )
+                            printMessage(MessageType.ERROR,textline)
             
                 # test for <span>    
                 testForSpan(textline,lineNumber, htmlFilePath)
@@ -282,7 +290,7 @@ if(os.path.exists(paramDictionary[dirArg])):
                 try:                
                     isHtml = re.search("html$",f,re.RegexFlag.IGNORECASE)
                     if(isHtml):                    
-                        testAHtmlFile(f)
+                        testAHtmlFile(f,paramDictionary)
                 except:
                     printMessage(MessageType.WARNING,"POSSIBLE FOREIGN UNICODE: Unable to print file from dir '" + d + "'.  This is most commonly caused by the use of non-english unicode character sets.")
             printMessage(MessageType.LABEL," -------------------------------------------- END OF WEBSITE PROCESSING -------------------------------------------")
