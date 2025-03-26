@@ -23,6 +23,10 @@ class MessageType(Enum):
     WARNING = "WARNING"
     ERROR = "ERROR"
 
+def getRelativePathFromFullPath(fullPath):
+    return str(fullPath).replace(paramDictionary[dirArg],"")
+
+
 def printMessage(messageType: MessageType, message):
     
     print(messageType.value + ",\"" + message.strip() + "\"")
@@ -106,7 +110,7 @@ def findAllFiles(dirToCheck):
 def checkForUpper(folderName):
     fod = os.path.basename(folderName)
     if(fod.islower()==False):
-        printMessage(MessageType.ERROR,"UPPER CASE FOLDERNAME: The folder '" + fod + "' includes upper case characters in violation of standards.  Please correct: " + folderName)
+        printMessage(MessageType.ERROR,"UPPER CASE FOLDERNAME: The folder '" + getRelativePathFromFullPath( fod ) + "' includes upper case characters in violation of standards.  Please correct: " + getRelativePathFromFullPath(folderName))
     else:
         printMessage(MessageType.INFO,"Folder '" + fod  + "' is OK.")
 
@@ -135,15 +139,15 @@ def hasRequiredDirsAndFiles(dirToCheck):
                 hasImages = True
             
     if(hasCss==False):
-        printMessage(MessageType.ERROR,"MISSING CSS DIRECTORY: Directory '" + dirToCheck + "' is missing a css folder in violation of standards")
+        printMessage(MessageType.ERROR,"MISSING CSS DIRECTORY: Directory '" + getRelativePathFromFullPath(dirToCheck) + "' is missing a css folder in violation of standards")
     else:
         printMessage(MessageType.INFO,"css folder found")
     if(hasJs==False):
-        printMessage(MessageType.ERROR,"MISSING JS DIRECTORY: Directory '" + dirToCheck + "' is missing a js folder in violation of standards")
+        printMessage(MessageType.ERROR,"MISSING JS DIRECTORY: Directory '" + getRelativePathFromFullPath(dirToCheck) + "' is missing a js folder in violation of standards")
     else:
         printMessage(MessageType.INFO,"js folder found")
     if(hasImages==False):
-        printMessage(MessageType.ERROR,"MISSING IMAGES DIRECTORY: Directory '" + dirToCheck + "' is missing an images folder in violation of standards")
+        printMessage(MessageType.ERROR,"MISSING IMAGES DIRECTORY: Directory '" + getRelativePathFromFullPath(dirToCheck) + "' is missing an images folder in violation of standards")
     else:
         printMessage(MessageType.INFO,imgFolder + " folder found")
         imgDirsInWebsite = allDirs = findAllDirectories(dirToCheck + os.path.sep + imgFolder)
@@ -154,7 +158,7 @@ def hasRequiredDirsAndFiles(dirToCheck):
                
         
     if(hasIndex==False):
-        printMessage(MessageType.ERROR,"MISSING INDEX.HTML: Directory '" + dirToCheck + "' is missing an index.html file in violation of standards")
+        printMessage(MessageType.ERROR,"MISSING INDEX.HTML: Directory '" + getRelativePathFromFullPath(dirToCheck) + "' is missing an index.html file in violation of standards")
     else:
         printMessage(MessageType.INFO,"index.html found")
            
@@ -184,7 +188,7 @@ def directoryContainsAHtmlFile(dirToCheck):
 
             
 def testAHtmlFile(htmlFilePath, paramsDictionaryToUse):
-    printMessage(MessageType.INFO,"Testing html file '" + htmlFilePath + "'")
+    printMessage(MessageType.INFO,"Testing html file '" + getRelativePathFromFullPath(htmlFilePath) + "'")
     fileNameOnly = os.path.basename(htmlFilePath)
 
     divCount = 0
@@ -212,14 +216,14 @@ def testAHtmlFile(htmlFilePath, paramsDictionaryToUse):
                 if(hasImg != None):                    
                     hasAlt = re.search("\\salt[\\s]*=",textline, re.RegexFlag.IGNORECASE)
                     if(hasAlt == None):
-                        printMessage(MessageType.ERROR,fileNameOnly + "(" + str(lineNumber) +  "): MISSING ALT: <img> missing alt on line "  + str(lineNumber) + " of file: " + htmlFilePath)
+                        printMessage(MessageType.ERROR,fileNameOnly + "(" + str(lineNumber) +  "): MISSING ALT: <img> missing alt on line "  + str(lineNumber) + " of file: " + getRelativePathFromFullPath(htmlFilePath))
                         printMessage(MessageType.ERROR,textline)
                 else:
                     hasImg = re.search("<img\\s", textline, re.RegexFlag.IGNORECASE)
                     if(hasImg != None):
                         hasAlt = re.search("\\salt[\\s]*=",textline, re.RegexFlag.IGNORECASE)
                         if(hasAlt == None):
-                            printMessage(MessageType.ERROR,fileNameOnly + "(" + str(lineNumber) +  "): POSSIBLE MISSING ALT - check next line of html: <img> missing alt on line "  + str(lineNumber) + " of file: " + htmlFilePath)
+                            printMessage(MessageType.ERROR,fileNameOnly + "(" + str(lineNumber) +  "): POSSIBLE MISSING ALT - check next line of html: <img> missing alt on line "  + str(lineNumber) + " of file: " + getRelativePathFromFullPath(htmlFilePath))
                             printMessage(MessageType.ERROR,textline)
                         hasHeight = re.search("\\sheight[\\s]*=",textline, re.RegexFlag.IGNORECASE)
                         if(hasHeight != None):
@@ -227,12 +231,12 @@ def testAHtmlFile(htmlFilePath, paramsDictionaryToUse):
                             printMessage(MessageType.ERROR,textline)
                         hasWidth = re.search("\\swidth[\\s]*=",textline, re.RegexFlag.IGNORECASE)
                         if(hasWidth != None):
-                            printMessage(MessageType.ERROR,fileNameOnly + "(" + str(lineNumber) +  "): WIDTH PROPERTY IN HTML- The width property should be specified in your css, not in your html."  + str(lineNumber) + " of file: " + htmlFilePath)
+                            printMessage(MessageType.ERROR,fileNameOnly + "(" + str(lineNumber) +  "): WIDTH PROPERTY IN HTML- The width property should be specified in your css, not in your html."  + str(lineNumber) + " of file: " + getRelativePathFromFullPath(htmlFilePath))
                             printMessage(MessageType.ERROR,textline)                
                 # Check for uppercase tags
                 hasUppercaseTag = re.search("<[A-Z]+",textline)
                 if(hasUppercaseTag):
-                    printMessage(MessageType.ERROR,fileNameOnly + "(" + str(lineNumber) +  "): UPPER CASE HTML: found on line "  + str(lineNumber) + " of file: " + htmlFilePath)
+                    printMessage(MessageType.ERROR,fileNameOnly + "(" + str(lineNumber) +  "): UPPER CASE HTML: found on line "  + str(lineNumber) + " of file: " + getRelativePathFromFullPath(htmlFilePath))
                     printMessage(MessageType.ERROR,textline)
                 
                 # Check for other things at some point
@@ -252,7 +256,7 @@ def isOneOfTheAcceptableNonStandardFiles(filePath):
         for nsf in nonStandardFiles:
             isOk = re.search(nsf,filePath,re.RegexFlag.IGNORECASE)  
             if(isOk):
-                printMessage(MessageType.INFO,"File: '" + filePath + "' is ignored.")
+                printMessage(MessageType.INFO,"File: '" + getRelativePathFromFullPath(filePath) + "' is ignored.")
                 isOkNonStandard = True
                 break
     return isOkNonStandard
@@ -262,26 +266,28 @@ def checkFile(filePath):
     fileNameOnly = os.path.basename(filePath)
     if(isOneOfTheAcceptableNonStandardFiles(filePath) == False):
         if(fileNameOnly.islower()==False):
-            printMessage(MessageType.ERROR,"UPPER CASE FILENAME: '" + fileNameOnly + "'. The file '" + filePath + "' contains upper case characters in violation of standards")
+            printMessage(MessageType.ERROR,"UPPER CASE FILENAME: '" + fileNameOnly + "'. The file '" + getRelativePathFromFullPath(filePath) + "' contains upper case characters in violation of standards")
         if(' ' in fileNameOnly):
-            printMessage(MessageType.ERROR,"SPACES IN FILENAME: '" + fileNameOnly + "'. The file '" + filePath + "' contains space characters in violation of standards")
+            printMessage(MessageType.ERROR,"SPACES IN FILENAME: '" + fileNameOnly + "'. The file '" + getRelativePathFromFullPath(filePath) + "' contains space characters in violation of standards")
     return fileNameOnly
+
+    
 
 def checkIfImage(imageFilename):
     isImage = re.search("jpg$|gif$|png$|svg$",imageFilename,re.RegexFlag.IGNORECASE)
     if(isImage != None):
-        printMessage(MessageType.INFO,"Check image file: " + imageFilename)
+        printMessage(MessageType.INFO,"Check image file: " + getRelativePathFromFullPath(imageFilename))
         fileSize = os.path.getsize(imageFilename)
         if(fileSize > IMAGE_TOO_BIG):
-            printMessage(MessageType.ERROR,"IMAGE TOO BIG: (" + str(fileSize) + " bytes). The file '" + imageFilename + "' has a filesize of " + str(fileSize) + ".  Images should be less than " + str(IMAGE_TOO_BIG) + " bytes.")
+            printMessage(MessageType.ERROR,"IMAGE TOO BIG: (" + str(fileSize) + " bytes). The file '" + getRelativePathFromFullPath(imageFilename) + "' has a filesize of " + str(fileSize) + ".  Images should be less than " + str(IMAGE_TOO_BIG) + " bytes.")
         else:
             if(fileSize > IMAGE_SIZE_WARNING):
-                printMessage(MessageType.WARNING,"IMAGE MIGHT BE TOO BIG: (" + str(fileSize) + " bytes). Most images should be less than " + str(IMAGE_SIZE_WARNING) + " bytes, unless they're a background image. The file '" + imageFilename + "' has a filesize of " + str(fileSize))
+                printMessage(MessageType.WARNING,"IMAGE MIGHT BE TOO BIG: (" + str(fileSize) + " bytes). Most images should be less than " + str(IMAGE_SIZE_WARNING) + " bytes, unless they're a background image. The file '" + getRelativePathFromFullPath(imageFilename) + "' has a filesize of " + str(fileSize))
         # Check for capital letters or spaces in the filename.
         fileNameOnly = os.path.basename(imageFilename)
         hasUpperCaseFilename = re.search("[A-Z]+",fileNameOnly)
         if(hasUpperCaseFilename):
-            printMessage(MessageType.ERROR,"UPPER CASE filename: " + fileNameOnly  + " found at: " + imageFilename)                    
+            printMessage(MessageType.ERROR,"UPPER CASE filename: " + fileNameOnly  + " found at: " + getRelativePathFromFullPath(imageFilename)) 
 
 print("MessageCode, Message")
 paramDictionary = parseArgs()
