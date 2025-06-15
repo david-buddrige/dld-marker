@@ -12,7 +12,7 @@ from enum import Enum
 dirArg = '-dir'
 pingDocsArg = '-pingDocs'
 webDevArg = '-webdev'
-requiredParamArray = [dirArg]
+required_parameter_list = [dirArg]
 optionalParmArray = [pingDocsArg,webDevArg]
 IMAGE_TOO_BIG = 307200
 IMAGE_SIZE_WARNING = 60000
@@ -27,52 +27,55 @@ def getRelativePathFromFullPath(fullPath):
     return str(fullPath).replace(paramDictionary[dirArg],"")
 
 
-def printMessage(messageType: MessageType, message):
-    
+def printMessage(messageType: MessageType, message):    
     print(messageType.value + ",\"" + message.strip() + "\"")
 
 
 def isAParam(theParam):    
     retVal = False
-    paramsToCheck = requiredParamArray + optionalParmArray
+    paramsToCheck = required_parameter_list + optionalParmArray
     for p in paramsToCheck:
         if(theParam == p):
             retVal = True
     return retVal
 
+def is_name_of_current_program(name_to_check):
+    CURRENT_PROGRAM = os.path.basename(__file__)
+    is_the_same = re.search(CURRENT_PROGRAM,name_to_check)
+    return is_the_same
+
 def parseArgs():
-    paramDict = { 
+    parameter_dictionary = { 
         pingDocsArg: False,
         webDevArg: False
     }
-    nextP = None
-    for p in sys.argv:
-        isMainProgram = re.search("html-tester.py",p)
-        if(isMainProgram):            
-            printMessage(MessageType.INFO, "Running " + p)
+    nextParameter = None
+    for parameter in sys.argv:
+        if(is_name_of_current_program(parameter)):            
+            printMessage(MessageType.INFO, "Running " + parameter)
         else:
-            if(isAParam(p)):
-                if(p == pingDocsArg):
+            if(isAParam(parameter)):
+                if(parameter == pingDocsArg):
                     # the -pingDocs parameter is an on/off setting and takes no arguments
-                    paramDict[p] = True
-                    nextP = None
-                elif(p == webDevArg):
+                    parameter_dictionary[parameter] = True
+                    nextParameter = None
+                elif(parameter == webDevArg):
                     # the -webdev parameter is an on/off setting and takes no arguments
-                    paramDict[p] = True
-                    nextP = None
+                    parameter_dictionary[parameter] = True
+                    nextParameter = None
                 else:
-                    nextP = p
-            elif(nextP != None):
-                paramDict[nextP] = p
-                nextP = None
+                    nextParameter = parameter
+            elif(nextParameter != None):
+                parameter_dictionary[nextParameter] = parameter
+                nextParameter = None
             else:            
-                message = "Parameter " + p + " is undefined"
+                message = "Parameter " + parameter + " is undefined"
                 print(message)
-    for p in requiredParamArray:
-        if(not (p in paramDict)):            
-            print("Parameter " + p + " is missing!")
+    for parameter in required_parameter_list:
+        if(not (parameter in parameter_dictionary)):            
+            print("Parameter " + parameter + " is missing!")
             sys.exit()
-    return paramDict
+    return parameter_dictionary
 
 def isValidDirOrFile(dirToCheck):
     isValid = True
@@ -276,7 +279,11 @@ def checkFile(filePath):
 def checkIfImage(imageFilename):
     isImage = re.search("jpg$|gif$|png$|svg$",imageFilename,re.RegexFlag.IGNORECASE)
     if(isImage != None):
-        printMessage(MessageType.INFO,"Check image file: " + getRelativePathFromFullPath(imageFilename))
+        try:
+            printMessage(MessageType.INFO,"Check image file: " + getRelativePathFromFullPath(imageFilename))
+        except:
+            printMessage(MessageType.WARNING,"error checking for image file")
+            #printMessage(MessageType.INFO,"Check image file: " + imageFilename)
         fileSize = os.path.getsize(imageFilename)
         if(fileSize > IMAGE_TOO_BIG):
             printMessage(MessageType.ERROR,"IMAGE TOO BIG: (" + str(fileSize) + " bytes). The file '" + getRelativePathFromFullPath(imageFilename) + "' has a filesize of " + str(fileSize) + ".  Images should be less than " + str(IMAGE_TOO_BIG) + " bytes.")
@@ -295,19 +302,30 @@ paramDictionary = parseArgs()
 if(os.path.exists(paramDictionary[dirArg])):    
     printMessage(MessageType.INFO,"Processing " + paramDictionary[dirArg])
     allDirs = findAllDirectories(paramDictionary[dirArg])    
+    num_dirs_failed = 0
+    num_dirs_processed = 0
+    total_dirs = 0
     for d in allDirs:        
-        if(directoryContainsAHtmlFile(d)):
-            hasRequiredDirsAndFiles(d)
-            filesInDir = findAllFiles(d)
-            for f in filesInDir:
-                try:                
-                    isHtml = re.search("html$",f,re.RegexFlag.IGNORECASE)
-                    if(isHtml):                    
-                        testAHtmlFile(f,paramDictionary)
-                except:
-                    printMessage(MessageType.WARNING,"POSSIBLE FOREIGN UNICODE: Unable to print file from dir '" + d + "'.  This is most commonly caused by the use of non-english unicode character sets.")
-            printMessage(MessageType.LABEL," -------------------------------------------- END OF WEBSITE PROCESSING -------------------------------------------")
-            printMessage(MessageType.LABEL,"")
+        total_dirs += 1
+        try:
+            
+            if(directoryContainsAHtmlFile(d)):
+                hasRequiredDirsAndFiles(d)
+                filesInDir = findAllFiles(d)
+                for f in filesInDir:
+                    try:                
+                        isHtml = re.search("html$",f,re.RegexFlag.IGNORECASE)
+                        if(isHtml):                    
+                            testAHtmlFile(f,paramDictionary)
+                    except:
+                        printMessage(MessageType.WARNING,"POSSIBLE FOREIGN UNICODE: Unable to print file from dir '" + d + "'.  This is most commonly caused by the use of non-english unicode character sets.")
+                printMessage(MessageType.LABEL," -------------------------------------------- END OF WEBSITE PROCESSING -------------------------------------------")
+                printMessage(MessageType.LABEL,"")
+                num_dirs_processed += 1
+        except:
+            num_dirs_failed += 1
+            print("Unable to process: " + d)
+    print("Processed",num_dirs_processed,"directories.", num_dirs_failed, "directories could not processed.")
 else:
     print("Directory " + paramDictionary[dirArg] + " not found.")
     sys.exit()
