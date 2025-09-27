@@ -1,9 +1,14 @@
-#from dld_marker import *
+# Programmer : David BUddrige
+# Purpose    : To see if all required headings are in the code
+# Usage      : python heading_finder.py -html-file-path "C:\path\filename.html"
+
+
 import os
 import re
 import sys
 from enum import Enum
 
+headings = ('Toy Pictures', 'Toy Prices', 'Toy Options', 'Toy News Article', 'Toy Breaking News')
 
 html_file_parameter = "-html-file-path"
 required_parameter_list = [html_file_parameter]
@@ -34,8 +39,6 @@ def print_message(messageType: MessageType, message):
 
 def parse_arguments(required_parameter_list, the_optional_parameters):
     parameter_dictionary = { 
-        # ping_docs_argument: False,
-        # web_development_argument: False
     }
     next_parameter = None
     for parameter in sys.argv:
@@ -85,10 +88,8 @@ def find_heading(heading, line):
         
         result = re.search(heading_regex, line)
         if(result):
-            # print  ("Found heading '" + heading + "'" )
             return True
         else:
-            # print  ("heading '",heading, "' not found" )
             return False
         return True
     else:
@@ -104,10 +105,7 @@ def look_for_headings(headings, list_of_lines):
     
     for heading in headings:
         for line in list_of_lines:
-            # print("Finding",heading,"in",line)
-
             if find_heading(heading, line):
-                # print("Found",heading,"in",line)
                 found_dictionary[heading] = True
     return found_dictionary
                 
@@ -121,12 +119,11 @@ def get_list_of_strings_from_filename(filename):
     return list_of_lines
     
 
-headings = ('Toy Pictures', 'Toy Prices', 'Toy Options', 'Toy News Article', 'Toy Breaking News')
 
 
-def print_heading_check_result(headings_dictionary):
+def print_heading_check_result(html_file, headings, headings_dictionary,):
     print("\n")
-    
+    print("Checked for headings: ", headings, "in", html_file)
     for heading, found in headings_dictionary.items():
         if found:
             print("Found '" + heading + "'")
@@ -136,15 +133,12 @@ def print_heading_check_result(headings_dictionary):
 
 
 if __name__ == "__main__":
-    # print("Running program")
-    # print("Heading finder")
     parameter_dictionary = get_parameter_dictionary(required_parameter_list, the_optional_parameters)
     
     if os.path.exists(parameter_dictionary[html_file_parameter]):
-        # print(parameter_dictionary[html_file_parameter], "found") 
         lines_in_html_file = get_list_of_strings_from_filename(parameter_dictionary[html_file_parameter])
         found_dictionary = look_for_headings(headings, lines_in_html_file)
-        print_heading_check_result(found_dictionary)
+        print_heading_check_result(parameter_dictionary[html_file_parameter], headings, found_dictionary)
     else:
         print(parameter_dictionary[html_file_parameter], "not found")    
   
