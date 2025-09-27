@@ -1,2 +1,4 @@
 out.txt
 out.csv
+*.csv
+*.pyc
