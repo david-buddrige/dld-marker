@@ -1,6 +1,6 @@
 # Programmer : David BUddrige
 # Purpose    : To see if all required headings are in the code
-# Usage      : python heading_finder.py -html-file-path "C:\path\filename.html"
+# Usage      : python heading_finder.py -html-file "C:\path\filename.html"
 
 
 import os
@@ -8,18 +8,16 @@ import re
 import sys
 from enum import Enum
 
-headings = ('Toy Pictures', 'Toy Prices', 'Toy Options', 'Toy News Article', 'Toy Breaking News')
+HEADINGS = ('Toy Pictures', 'Toy Prices', 'Toy Options', 'Toy News Article', 'Toy Breaking News')
 
-html_file_parameter = "-html-file-path"
-required_parameter_list = [html_file_parameter]
-the_optional_parameters = []
+HTML_FILE_PARAMETER     = "-html-file"
+REQUIRED_PARAMETER_LIST = [HTML_FILE_PARAMETER]
+OPTIONAL_PARAMETER_LIST = []
 
-class MessageType(Enum):
-    LABEL = "LABEL"
-    INFO = "INFO"
-    WARNING = "WARNING"
-    ERROR = "ERROR"
-    
+HEADING_FOUND_KEY = "heading_found"
+LINE_NUMBER_KEY   = "line_number",
+LINE_KEY          = "line"
+  
 def check_parameter_in_list(the_parameter, required_parameter_list, optional_parameter_list):
     retVal = False
     parameters_to_check = required_parameter_list + optional_parameter_list
@@ -33,18 +31,11 @@ def is_name_of_current_program(name_to_check):
     is_the_same = re.search(CURRENT_PROGRAM,name_to_check)
     return is_the_same
 
-def print_message(messageType: MessageType, message):    
-    print(messageType.value + ",\"" + message.strip() + "\"")
-
-
 def parse_arguments(required_parameter_list, the_optional_parameters):
-    parameter_dictionary = { 
-    }
+    parameter_dictionary = { }
     next_parameter = None
     for parameter in sys.argv:
-        if(is_name_of_current_program(parameter)):            
-            print_message(MessageType.INFO, "Running " + parameter)
-        else:
+        if(not is_name_of_current_program(parameter)):             
             if check_parameter_in_list(parameter, required_parameter_list, the_optional_parameters):
                 next_parameter = parameter
             elif next_parameter != None:
@@ -94,19 +85,29 @@ def find_heading(heading, line):
         return True
     else:
         return False
+    
+ 
+def get_heading_information(found, line_number, line):
+    heading_information = {
+        HEADING_FOUND_KEY : found,
+        LINE_NUMBER_KEY   : line_number,
+        LINE_KEY          : line
+    } 
+    return heading_information 
+
 
 def look_for_headings(headings, list_of_lines):
-    
-    
     found_dictionary = {}
     
     for heading in headings:
-        found_dictionary[heading] = False
+        found_dictionary[heading] = get_heading_information(False, 0, "")
     
     for heading in headings:
+        line_number = 1
         for line in list_of_lines:
             if find_heading(heading, line):
-                found_dictionary[heading] = True
+                found_dictionary[heading] = get_heading_information(True, line_number, line)
+            line_number += 1
     return found_dictionary
                 
 
@@ -119,28 +120,28 @@ def get_list_of_strings_from_filename(filename):
     return list_of_lines
     
 
-
-
-def print_heading_check_result(html_file, headings, headings_dictionary,):
+def print_heading_check_result(html_file, headings, headings_dictionary):
     print("\n")
     print("Checked for headings: ", headings, "in", html_file)
-    for heading, found in headings_dictionary.items():
-        if found:
-            print("Found '" + heading + "'")
+    for heading, information in headings_dictionary.items():
+        if information[HEADING_FOUND_KEY]:
+            found_message = "Found '" + heading + "'" 
+            print(found_message.ljust(30) + "Line:", information[LINE_NUMBER_KEY], ":", information[LINE_KEY])
         else:
             print("Missing '" + heading + "'")
+
             
 
 
 if __name__ == "__main__":
-    parameter_dictionary = get_parameter_dictionary(required_parameter_list, the_optional_parameters)
+    parameter_dictionary = get_parameter_dictionary(REQUIRED_PARAMETER_LIST, OPTIONAL_PARAMETER_LIST)
     
-    if os.path.exists(parameter_dictionary[html_file_parameter]):
-        lines_in_html_file = get_list_of_strings_from_filename(parameter_dictionary[html_file_parameter])
-        found_dictionary = look_for_headings(headings, lines_in_html_file)
-        print_heading_check_result(parameter_dictionary[html_file_parameter], headings, found_dictionary)
+    if os.path.exists(parameter_dictionary[HTML_FILE_PARAMETER]):
+        lines_in_html_file = get_list_of_strings_from_filename(parameter_dictionary[HTML_FILE_PARAMETER])
+        found_dictionary = look_for_headings(HEADINGS, lines_in_html_file)
+        print_heading_check_result(parameter_dictionary[HTML_FILE_PARAMETER], HEADINGS, found_dictionary)
     else:
-        print(parameter_dictionary[html_file_parameter], "not found")    
+        print(parameter_dictionary[HTML_FILE_PARAMETER], "not found")    
   
 else:
     print("Running tests")
