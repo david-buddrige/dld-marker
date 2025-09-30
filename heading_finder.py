@@ -1,5 +1,6 @@
 # Programmer : David BUddrige
-# Purpose    : To see if all required headings are in the code
+# Date       : 27 September, 2025
+# Purpose    : To see if all headings required for DLD AT2 are in the code
 # Usage      : python heading_finder.py -html-file "C:\path\filename.html"
 
 
@@ -112,11 +113,13 @@ def look_for_headings(headings, list_of_lines):
                 
 
 def get_list_of_strings_from_filename(filename):
-    file_handle = open(filename,"r")
-    list_of_lines = []
-    for line in file_handle:
-        list_of_lines.append(line.strip())
-    file_handle.close()
+    list_of_lines = []     
+    try:
+        with open(filename,"r") as file_handle:
+            for line in file_handle:
+                list_of_lines.append(line.strip())
+    except:
+        print("Error processing",filename)
     return list_of_lines
     
 
