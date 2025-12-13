@@ -189,7 +189,29 @@ def directoryContainsAHtmlFile(dirToCheck):
                 break
     return hasAHtmlFile   
 
+def has_style_property(line):
+    has_style = re.search("\\sstyle=[\"\'].*[\"\']",line)
+    if (has_style):
+        return True
+    else:
+        return False
             
+            
+def has_width_property(line):
+    has_width = re.search("\\swidth=[\"\'].*[\"\']",line)
+    if (has_width):
+        return True
+    else:
+        return False
+
+def has_height_property(line):
+    has_height = re.search("\\sheight=[\"\'].*[\"\']",line)
+    if (has_height):
+        return True
+    else:
+        return False
+
+    
 def testAHtmlFile(htmlFilePath, paramsDictionaryToUse):
     print_message(MessageType.INFO,"Testing html file '" + getRelativePathFromFullPath(htmlFilePath) + "'")
     fileNameOnly = os.path.basename(htmlFilePath)
@@ -243,6 +265,23 @@ def testAHtmlFile(htmlFilePath, paramsDictionaryToUse):
                     print_message(MessageType.ERROR,textline)
                 
                 # Check for other things at some point
+                
+                # check for inline css
+                if(has_style_property(textline)):
+                    print_message(MessageType.ERROR,fileNameOnly + "(" + str(lineNumber) +  "): INLINE CSS (style property): found on line "  + str(lineNumber) + " of file: " + getRelativePathFromFullPath(htmlFilePath))
+                    print_message(MessageType.ERROR,textline)
+
+                # check for use of width property                
+                if(has_width_property(textline)):
+                    print_message(MessageType.ERROR,fileNameOnly + "(" + str(lineNumber) +  "): INLINE CSS (width property): found on line "  + str(lineNumber) + " of file: " + getRelativePathFromFullPath(htmlFilePath))
+                    print_message(MessageType.ERROR,textline)
+                
+                # check for use of height property
+                if(has_height_property(textline)):
+                    print_message(MessageType.ERROR,fileNameOnly + "(" + str(lineNumber) +  "): INLINE CSS (height property): found on line "  + str(lineNumber) + " of file: " + getRelativePathFromFullPath(htmlFilePath))
+                    print_message(MessageType.ERROR,textline)
+                
+                
         
         except Exception as ex:
             # template = "An exception of type {0} occurred. Arguments:\n{1!r}"

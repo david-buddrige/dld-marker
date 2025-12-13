@@ -2,5 +2,6 @@ Planned improvements for html-tester.py
 
 1. Look for @media query in css files, and display an error or warning if not present
 2. Display an error or warning if there is more than one css file
-3. 
+3. display an error if width and height properties are found inside an <img> element.
+4. display an error if style= properties are found in any element.
 
