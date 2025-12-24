@@ -27,7 +27,7 @@ def get_name_of_current_program():
     return os.path.basename(__file__).strip()
 
 def is_name_of_current_program(name_to_check):
-    return name_to_check.strip() == get_name_of_current_program():
+    return name_to_check.strip() == get_name_of_current_program()
 
 def is_a_parameter(the_parameter, required_parameter_list = REQUIRED_PARAMETER_LIST, optional_parameter_list = BOOLEAN_PARAMETER_LIST):    
     paramsToCheck = required_parameter_list + optional_parameter_list
