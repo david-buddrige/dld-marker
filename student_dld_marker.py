@@ -4,6 +4,7 @@ import sys             # Import system library
 from enum import Enum  # Import Enumeration library
 
 IGNORE_FILE_OR_DIRECTORY = ['__MACOSX$','.git$','.idea$','.gitignore$','.vscode$']
+HELP_PARAMETER = '-help'
 DIRECTORY_ARGUMENT = '-dir'
 OUTPUT_ARGUMENT = '-output'
 PING_DOCS_ARGUMENT = '-pingDocs'
@@ -53,6 +54,13 @@ def get_name_of_current_program():
     return os.path.basename(__file__).strip()
 
 
+def print_help_message():
+    print("Student DLD marker\n")
+    print("This program allows students to perform a check on their code for compliance against key standards.\n")
+    print("It will generate a comma delimited file containing a series of messages about your website folder.")
+    print("Usage:\n")
+    print("python student_dld_marker.py -dir [directory-of-website] -output [some-output-filename.csv]")
+
 def is_name_of_current_program(name_to_check):
     """
     
@@ -85,6 +93,11 @@ def is_a_parameter(the_parameter,
     paramsToCheck = required_parameter_list + optional_parameter_list
     return the_parameter in paramsToCheck
 
+def is_help_parameter(parameter):
+    if parameter == HELP_PARAMETER:
+        return True
+    else:
+        return False
 
 def parse_arguments(required_parameter_list = REQUIRED_PARAMETER_LIST, 
                     boolean_parameter_list = BOOLEAN_PARAMETER_LIST):
@@ -95,7 +108,10 @@ def parse_arguments(required_parameter_list = REQUIRED_PARAMETER_LIST,
     
     next_parameter = None
     for parameter in sys.argv:
-        if not is_name_of_current_program(parameter):            
+        if not is_name_of_current_program(parameter):     
+            if is_help_parameter(parameter):
+                print_help_message()     
+                sys.exit()  
             if is_a_parameter(parameter):
                 if parameter in boolean_parameter_list:
                     # the -pingDocs parameter and the -webdev parameter is an on/off setting and takes no arguments
@@ -109,10 +125,12 @@ def parse_arguments(required_parameter_list = REQUIRED_PARAMETER_LIST,
             else:
                 message = "Parameter " + parameter + " is undefined"
                 print(message)
+                print_help_message()
     # Check that we have the needed parameters
     for parameter in required_parameter_list:
         if not parameter in parameter_dictionary:            
             print("Parameter " + parameter + " is missing!")
+            print_help_message()
             sys.exit()
     return parameter_dictionary
 
