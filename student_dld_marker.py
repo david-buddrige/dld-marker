@@ -23,7 +23,16 @@ class MessageType(Enum):
     ERROR = "ERROR"
 
 class Message:
+    """
+    This class represents a message that will be output.  It
+    may be any one of the MessageType types, and will have an
+    associated message. 
     
+    Having a MessageType allows us to generate a comma delimited text
+    output file that can then be filtered on the kind of message.  For
+    example, you may choose only to see the ERROR messages, or just 
+    the INFO messages, or any combination.
+    """
     def __init__(self, message_type, message):
         self.message_type = message_type
         self.message = message        
